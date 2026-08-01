@@ -1,6 +1,6 @@
 ---
-name: grilling
-description: Grill the user relentlessly about a plan, decision, or idea. Use when the user wants to stress-test their thinking, or uses any 'grill' trigger phrases.
+name: brainstorm
+description: Stress-test a plan, decision, or idea through a relentless interview. Use when the user wants to brainstorm, sharpen a design, or stress-test their thinking (any 'brainstorm' / 'grill me' trigger phrases).
 ---
 
 Interview me relentlessly about every aspect of this until we reach a shared understanding. Walk down each branch of the decision tree, resolving dependencies between decisions one-by-one. For each question, provide your recommended answer.
