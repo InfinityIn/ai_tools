@@ -1,0 +1,41 @@
+# Гейт безусловный — R4.2.
+#
+# Один джоб, без фильтров по изменённым путям и без «упал, но всё равно зелёный»:
+# ни один шаг не может не запуститься, потому что изменились «не те» файлы, и ни
+# один не может упасть незаметно. Правило добавляется сюда, а не в markdown:
+# рекомендация живёт в документе, обязательство — в гейте.
+#
+# Последний шаг — day0_check: пока в DAY0.md остались незакрытые пункты, сборка
+# красная. Это намеренно: день 0 не размазывается по кварталу.
+
+name: gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: install tools
+        run: pip install ruff mypy pytest
+
+      - name: lint
+        run: ruff check .
+
+      - name: types
+        run: mypy --strict scripts/day0_check.py
+
+      - name: tests
+        run: pytest -q --strict-markers
+
+      - name: day 0 checklist
+        run: python scripts/day0_check.py
