@@ -22,7 +22,11 @@ from typing import NamedTuple
 
 CHECKBOX = re.compile(r"^\s*- \[(?P<mark>[ xX])\]\s+(?P<body>.+?)\s*$")
 FENCE = re.compile(r"^\s*(```|~~~)")
+# SKIP decides whether an item is waived: only "[skip: ADR-nnnn]" counts.
 SKIP = re.compile(r"\[skip:\s*ADR-(?P<number>\d{4})\]")
+# SKIP_TOKEN is for display only: any skip-looking token is stripped from the
+# printed title, including a malformed one such as "[skip: later]".
+SKIP_TOKEN = re.compile(r"\s*\[skip:[^\]]*\]")
 CODE = re.compile(r"^(?P<code>R\d+\.\d+)")
 SEPARATORS = (" — ", " - ")
 
@@ -59,9 +63,9 @@ def title_of(tail: str) -> str:
             rest = tail[len(separator) :]
             for end in SEPARATORS:
                 if end in rest:
-                    return rest.split(end, 1)[0].strip()
-            return SKIP.sub("", rest).strip()
-    return SKIP.sub("", tail).strip()
+                    return SKIP_TOKEN.sub("", rest.split(end, 1)[0]).strip()
+            return SKIP_TOKEN.sub("", rest).strip()
+    return SKIP_TOKEN.sub("", tail).strip()
 
 
 def adr_exists(project_root: Path, number: str) -> bool:

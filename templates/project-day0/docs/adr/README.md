@@ -8,8 +8,8 @@
 **PR с архитектурным решением без ADR не мержится.** Ревьюер вправе вернуть PR одной
 строкой: «нет ADR».
 
-Регламент — R2.2 в каталоге `ai_tools`:
-[docs/regulations](https://github.com/InfinityIn/ai_tools/blob/main/docs/regulations/README.md).
+Регламент — [R2.2](https://github.com/InfinityIn/ai_tools/blob/main/docs/regulations/R2.2-adr.md)
+в каталоге `ai_tools`.
 
 ## Когда нужен ADR
 
@@ -23,7 +23,9 @@
 
 ## Нумерация и файлы
 
-`docs/adr/nnnn-slug.md`, где `nnnn` — сквозной номер с ведущими нулями (`0001`, `0002`),
+`docs/adr/nnnn-slug.md`, где `nnnn` — сквозной номер с ведущими нулями (`0001`, `0002`);
+первый ADR проекта — `0001-*.md`. Шаблон называется `_template.md` намеренно: файл с
+номером занял бы `0001`, и пункт дня 0 можно было бы списать ссылкой на пустой шаблон.
 `slug` — короткое имя в нижнем регистре через дефис: `0002-modular-monolith.md`.
 Номера не переиспользуются; отменённый ADR остаётся в истории со статусом.
 
@@ -41,4 +43,4 @@
 
 ## Как завести
 
-Скопировать [0001-template.md](0001-template.md) в `nnnn-slug.md` и заполнить.
+Скопировать [_template.md](_template.md) в `nnnn-slug.md` и заполнить.

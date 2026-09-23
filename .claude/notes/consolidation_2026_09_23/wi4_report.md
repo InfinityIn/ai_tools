@@ -158,7 +158,70 @@ exit=0        # вместо 1 — гейт пропустил бы пустой
   что проект создаёт.
 - `.secrets/` не создан намеренно (иначе попал бы в git пустым каталогом или `.gitkeep`).
 
+## Правки по ревью («мержить после правок»)
+
+### F1 (medium) — шаблон ADR занимал номер 0001
+
+`docs/adr/0001-template.md` матчился глобом `0001-*.md`, по которому проверяется
+`[skip: ADR-nnnn]`: свежий проект мог списать первый пункт дня 0 ссылкой на пустой шаблон.
+`git mv` в `docs/adr/_template.md`, ссылки в `docs/adr/README.md` поправлены, заголовок
+шаблона `# ADR-0001` → `# ADR-<nnnn>`, в раздел «Нумерация» добавлено, **почему** файл
+называется без номера (иначе правка отменится при первой же уборке).
+
+Сторож: `test_shipped_adr_dir_claims_no_number` — копирует **реальный** `docs/adr/`
+шаблона во временный проект и требует, чтобы `[skip: ADR-0001]` остался открытым.
+Тест написан до правки и был красным:
+
+```
+FAILED test_shipped_adr_dir_claims_no_number   # пункт закрылся ссылкой на шаблон
+```
+
+### F2 (medium) — три недоказанных сторожа
+
+Добавлены тесты, каждый убит мутацией ревьюера (мутация → упавший тест → откат):
+
+| Мутация в `day0_check.py` | Упавший тест |
+|---|---|
+| `if not items: return 2` → `return 0` | `test_file_without_checkboxes_is_an_error` (1 failed, 14 passed) |
+| `glob(f"{number}-*.md")` → `glob("*.md")` | `test_adr_with_another_number_does_not_close_skip` + `test_shipped_adr_dir_claims_no_number` (2 failed, 13 passed) |
+| `SKIP` → `\[skip:\s*(?:ADR-)?(?P<number>[^\]]+)\]` | `test_malformed_skip_is_not_a_skip` (1 failed, 14 passed) |
+
+Смысл каждого: нечитаемый чек-лист — это отказ, а не «пусто, значит всё закрыто»; ADR
+обязан быть **тем самым**, на который ссылается пропуск; `[skip: потом напишем]` — не
+пропуск, а обычный открытый пункт (и в выводе не притворяется попыткой пропуска).
+
+### F3 (low) — 29 ссылок вели на один URL
+
+Каждый пункт `DAY0.md` теперь ссылается на свой файл регламента WI-1
+(`.../docs/regulations/R0.1-project-constitution.md` и т. д.) — 29 ссылок, 29 различных
+URL. Аналогично `docs/adr/README.md` → `R2.2-adr.md`, `docs/testing.md` →
+`R4.1-testing-pyramid.md`. В `CLAUDE.md` ссылка на **README каталога** оставлена намеренно:
+там речь о каталоге целиком, а не о конкретном регламенте.
+
+### F4 (low) — токен `[skip: ...]` протекал в название
+
+Разведены две регулярки: `SKIP` решает, считается ли пункт пропущенным (только строгое
+`[skip: ADR-nnnn]`), `SKIP_TOKEN` чистит печатаемое название от любого skip-подобного
+токена, включая кривой. Сторож — `test_skip_token_does_not_leak_into_the_printed_title`,
+до правки красный (в выводе печаталось `[ ] R6.1 - slo and alerts [skip: потом напишем]`).
+
+### После правок
+
+```
+$ ruff check .                            All checks passed!
+$ mypy --strict scripts/day0_check.py     Success: no issues found in 1 source file
+$ pytest -q --strict-markers              15 passed
+$ python scripts/day0_check.py            29 items total / 29 open items / exit=1
+$ wc -l CLAUDE.md                         43
+$ grep -c '^- \[ \] R' DAY0.md            29
+$ grep -oE 'regulations/[^)]+\.md' DAY0.md | sort -u | wc -l    29
+$ grep -cE 'paths:|continue-on-error' .github/workflows/gate.yml    0
+$ git status --short                      (чисто)
+```
+
 ## Коммиты
 
 - `6d3e8b7` — `templates/project-day0/**` (13 файлов).
-- отчёт — следующим коммитом.
+- `e735f49` — отчёт.
+- HEAD ветки `feat/wi4-day0-template` — правки по ревью F1–F4 вместе с этим разделом
+  (5 новых тестов, 15 всего); хеш не вписан в сам коммит по очевидной причине.

@@ -151,3 +151,66 @@ def test_template_checklist_matches_the_file(tmp_path: Path) -> None:
     assert in_file == EXPECTED_OPEN_ITEMS
     shutil.copy(DAY0, tmp_path / "DAY0.md")
     assert open_count(run(str(tmp_path / "DAY0.md")).stdout) == in_file
+
+
+def test_shipped_adr_dir_claims_no_number(tmp_path: Path) -> None:
+    """The ADR template must not occupy a number a skip could point at.
+
+    A file named 0001-*.md would let a fresh project waive its first
+    checklist item with [skip: ADR-0001] - pointing at an empty template.
+    """
+    shutil.copytree(PROJECT_ROOT / "docs" / "adr", tmp_path / "docs" / "adr")
+    day0 = _one_item_project(tmp_path, "- [ ] R0.1 - constitution [skip: ADR-0001]")
+    result = run(str(day0))
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert "skip without ADR" in result.stdout
+
+
+def test_file_without_checkboxes_is_an_error(tmp_path: Path) -> None:
+    """A checklist the parser cannot read is a failure, not a pass."""
+    day0 = tmp_path / "DAY0.md"
+    day0.write_text("# Day 0\n\nprose only, no checkboxes at all\n", encoding="utf-8")
+    result = run(str(day0))
+    assert result.returncode == 2, result.stdout + result.stderr
+    assert "no checklist items" in (result.stdout + result.stderr)
+
+
+def test_adr_with_another_number_does_not_close_skip(tmp_path: Path) -> None:
+    """Any ADR is not enough: it must be the one the skip names."""
+    day0 = _one_item_project(
+        tmp_path, "- [ ] R6.5 - backup and restore test [skip: ADR-0002]"
+    )
+    adr = tmp_path / "docs" / "adr"
+    adr.mkdir(parents=True)
+    (adr / "0003-something-else.md").write_text("# ADR-0003\n", encoding="utf-8")
+    result = run(str(day0))
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert "skip without ADR" in result.stdout
+    assert open_count(result.stdout) == 1
+
+
+def test_malformed_skip_is_not_a_skip(tmp_path: Path) -> None:
+    """[skip: we will write it later] is a plain open item, not a waiver."""
+    day0 = _one_item_project(
+        tmp_path, "- [ ] R6.5 - backup and restore test [skip: потом напишем]"
+    )
+    result = run(str(day0))
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert open_count(result.stdout) == 1
+    # not even recognised as an attempted skip
+    assert "skip without ADR" not in result.stdout
+
+
+def test_skip_token_does_not_leak_into_the_printed_title(tmp_path: Path) -> None:
+    day0 = tmp_path / "DAY0.md"
+    day0.write_text(
+        "# Day 0\n\n"
+        "- [ ] R6.5 - backup and restore test [skip: ADR-0002]\n"
+        "- [ ] R6.1 - slo and alerts [skip: потом напишем]\n",
+        encoding="utf-8",
+    )
+    result = run(str(day0))
+    assert result.returncode == 1, result.stdout + result.stderr
+    for line in result.stdout.splitlines():
+        if line.lstrip().startswith("[ ]"):
+            assert "[skip:" not in line, line
