@@ -1,3 +1,4 @@
 .secrets/
 tmp/
 *.log
+.claude/worktrees/
