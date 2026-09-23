@@ -5,7 +5,11 @@
 #
 # Usage:
 #   .\install.ps1 [-Dest <path>]           install (default ~/.claude/skills)
-#   .\install.ps1 -Check [-Dest <path>]    compare only, exit 1 if anything differs
+#   .\install.ps1 -Check [-Dest <path>]    compare only, write nothing;
+#                                          exit 1 if any ai_tools skill differs
+#                                          or is missing. Directories in Dest
+#                                          that do not come from src are listed
+#                                          as "foreign" and are not a failure.
 param(
     [string]$Dest = (Join-Path $env:USERPROFILE ".claude\skills"),
     [switch]$Check

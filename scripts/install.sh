@@ -6,7 +6,11 @@
 #
 # Usage:
 #   install.sh [dest]            install into dest (default ~/.claude/skills)
-#   install.sh --check [dest]    compare only, exit 1 if anything differs
+#   install.sh --check [dest]    compare only, write nothing;
+#                                exit 1 if any ai_tools skill differs or is
+#                                missing. Directories in dest that do not come
+#                                from src are listed as "foreign" and are not
+#                                a failure.
 set -euo pipefail
 
 mode="install"
