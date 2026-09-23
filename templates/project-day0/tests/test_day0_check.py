@@ -205,8 +205,11 @@ def test_skip_token_does_not_leak_into_the_printed_title(tmp_path: Path) -> None
     day0 = tmp_path / "DAY0.md"
     day0.write_text(
         "# Day 0\n\n"
+        # one separator: the title is the whole tail
         "- [ ] R6.5 - backup and restore test [skip: ADR-0002]\n"
-        "- [ ] R6.1 - slo and alerts [skip: потом напишем]\n",
+        "- [ ] R6.1 - slo and alerts [skip: потом напишем]\n"
+        # two separators: the title is the first field only (the split branch)
+        "- [ ] R5.2 - backup [skip: ADR-0002] - set up backup - [R5.2](http://x)\n",
         encoding="utf-8",
     )
     result = run(str(day0))
@@ -214,3 +217,5 @@ def test_skip_token_does_not_leak_into_the_printed_title(tmp_path: Path) -> None
     for line in result.stdout.splitlines():
         if line.lstrip().startswith("[ ]"):
             assert "[skip:" not in line, line
+    # the split branch must strip the token, not just cut the line short
+    assert "[ ] R5.2 - backup  <- skip without ADR" in result.stdout, result.stdout
