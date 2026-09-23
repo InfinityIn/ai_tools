@@ -29,3 +29,11 @@
   Ревью WI-3: «после правок» (P1: выдуманная цифра «4 из 5», выдуманный артефакт реестра флагов, нет раздела «Вход»
   в 4 файлах; P2 потери при переносе). Все правки — тем же разработчикам.
 - Порядок мержа: WI-1 → WI-2 → WI-3 → WI-4 (ссылки на R-каталог и install-скрипт без references).
+- Мержи в main (--no-ff): WI-1 9af2802 → WI-2 c753a8d → WI-3 87972b7 → WI-4 d8e0077; README e0c2c0c; erratum d494f4a. Пуш main.
+- Установка скиллов: install.sh отклонён (rm -rf), сделано cp поверх с резервной копией в scratchpad; `--check` OK 7/7.
+  15 sdlc-* перенесены из ~/.claude/skills в scratchpad (резерв), grep sdlc = 0.
+- Приёмка на main: README 49 кодов / 49 файлов; память 18 закреплено; «Нужно от вас» src=1, skills=1; refs 15, процессных слов 0;
+  CLAUDE.md шаблона 43 строки; day0_check → 29 open, exit 1; pytest 15 passed.
+- WI-5 (villas): ветка chore/regulations-link ba0691df запушена; PR не создан — PAT без права pull-requests (403).
+  CLAUDE.md villas: ai_tools ×6, «правило нуля» 0; docs/agent-traps.md; MEMORY.md villas — строка на каталог.
+- Метрика: перенесено уроков 18 / удалено копий блока «Нужно от вас» 9→1 (в ~/.claude/skills), sdlc-скиллов 15→0 / stub'ов 35.
