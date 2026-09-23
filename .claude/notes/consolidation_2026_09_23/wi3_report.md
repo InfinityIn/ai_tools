@@ -1,0 +1,116 @@
+# WI-3 — отчёт: 15 скиллов `sdlc-*` → справочники этапов
+
+Ветка: `feat/wi3-sdlc-refs`. Дата: 2026-09-23.
+Основание: `tz.md`, раздел WI-3 и «Критерий готовности» п. 4; решение владельца
+от 23.09.2026 — профильные скиллы (`src/process/`) остаются единственным рабочим
+контуром, `sdlc-*` становятся справочниками артефактов этапов.
+
+## Что сделано
+
+1. Создан каталог `src/references/sdlc/` — **15 справочников** этапов, по одному
+   на каждый бывший скилл `sdlc-*`.
+2. Каждый справочник содержит только **артефакты этапа**: что на выходе, шаблоны
+   артефактов, критерии приёмки, типовые ошибки, границы этапа. Блоки ведения
+   сессии (роли, скелет, модели исполнителей, стандарт финала) не переносились —
+   они живут в `src/process/`.
+3. Заголовок каждого файла: H1 → строка «Справочник этапа …» → «Рабочий контур —
+   `<профильный скилл>`» → коды регламентов из §4 каталога R0–R7.
+4. Полезные шаблоны артефактов из общих `regulations/` бывших скиллов (они были
+   побитово одинаковы во всех 15 каталогах) перенесены подкаталогами рядом:
+   - `sdlc/test-design/test-cases-csv-format.md` — формат экспорта тест-кейсов;
+   - `sdlc/development/corporate-code-standard.md` — корпоративный стандарт кода;
+   - `sdlc/code-review/corporate-code-review-policy.md` — корпоративный регламент
+     проверки кода.
+   Три файла-заготовки (`requirements.md`, `structure.md`, `test-docs.md`) не
+   переносились — они пустые («раздел будет заполнен командой»).
+5. Индекс — `src/references/README.md` (уровнем выше, чтобы не ломать счётчик 15).
+
+## Таблица переноса
+
+| Бывший скилл | Справочник | Строк было | Строк стало | Рабочий контур | Регламенты |
+|---|---|---:|---:|---|---|
+| `sdlc-requirements` | `sdlc/requirements.md` | 72 | 76 | `develop-it` · корп. частично | R1.1, R1.4, R1.5 |
+| `sdlc-architecture` | `sdlc/architecture.md` | 235 | 101 | `develop-it`, `research-it` · корп. частично | R2.1, R2.2, R2.6 |
+| `sdlc-system-analysis` | `sdlc/system-analysis.md` | 88 | 80 | `develop-it` | R1.4, R2.3, R2.4 |
+| `sdlc-development` | `sdlc/development.md` | 300 | 96 | `develop-it` | R3.1–R3.4 |
+| `sdlc-development-backend` | `sdlc/development-backend.md` | 315 | 86 | `develop-it` | R2.3, R2.4, R3.4, R5.2 |
+| `sdlc-development-frontend` | `sdlc/development-frontend.md` | 334 | 94 | `develop-it` | R2.3, R3.1, R5.3 |
+| `sdlc-code-review` | `sdlc/code-review.md` | 193 | 99 | `develop-it` | R4.4, R4.3, R3.2 |
+| `sdlc-build` | `sdlc/build.md` | 178 | 93 | `develop-it` | R4.2, R5.1 |
+| `sdlc-test-docs` | `sdlc/test-docs.md` | 1147 | 141 | `develop-it`, `analyze-it` · **корпоративный** | R1.1, R4.1 |
+| `sdlc-test-design` | `sdlc/test-design.md` | 382 | 107 | `develop-it` · **корпоративный** | R4.1, R4.3 |
+| `sdlc-testing` | `sdlc/testing.md` | 69 | 94 | `develop-it` | R4.1, R4.3, R5.3 |
+| `sdlc-operations` | `sdlc/operations.md` | 177 | 101 | `analyze-it` | R6.1–R6.4 |
+| `sdlc-new-feature` | `sdlc/new-feature.md` | 428 | 123 | `develop-it` · корп. частично | R1.4, R0.4, R3.5 |
+| `sdlc-continue-feature` | `sdlc/continue-feature.md` | 126 | 82 | `develop-it` · корп. частично | R1.4, R7.4 |
+| `sdlc-full` | `sdlc/full.md` | 84 | 79 | `develop-it` | R1.4, R3.1, R4.5 |
+| **Итого** | | **4128** | **1452** | | |
+
+Плюс приложения: 84 + 205 + 28 строк (шаблоны артефактов, перенесены без
+переписывания, с заменой шапки «применяется скиллом X» на ссылку на справочник).
+
+К `sdlc-*` прилагались общие `regulations/` — 6 файлов × 15 копий = 90 файлов,
+побитово идентичных (проверено `md5sum`); из них уникального содержания —
+3 файла, они и перенесены.
+
+`sdlc-testing` и `sdlc-requirements` стали длиннее исходника: оба скилла были
+тонкими процедурами без критериев приёмки и типовых ошибок — справочник их
+добавляет.
+
+## Три «процессных» скилла
+
+`new-feature`, `continue-feature`, `full` роль исполнителя не сохраняют: её
+берёт `develop-it` + спецификация фичи (R1.4). В справочниках оставлен только
+каркас, который они держали: структура `.sdlc/<slug>/`, шаблоны `manifest.yaml`
+и `config.yaml`, порядок этапов, правило «артефакт передаётся по ссылке, а не
+копией», петля возврата после тестирования. В каждом из трёх — явная строка
+«Рабочий контур — `develop-it`; процесс не здесь».
+
+## Проверка критериев готовности
+
+| Критерий | Команда | Результат |
+|---|---|---|
+| Ровно 15 справочников | `ls src/references/sdlc/*.md \| wc -l` | **15** ✅ |
+| Нет блоков ведения сессии | `grep -rliE "оркестратор\|субагент\|сабагент\|параллельными агентами" src/references/` | **0 файлов** ✅ |
+| H1 + «Справочник этапа …» + «Рабочий контур —» + код `R\d\.\d` | построчная проверка 15 файлов | **15/15** ✅ |
+| Корпоративные помечены (≥ 2) | `grep -l "корпоративный контур" src/references/sdlc/*.md \| wc -l` | **6** ✅ |
+| Индекс ссылается на все 15 | проверка существования каждой ссылки из README | **18 ссылок, 0 битых** ✅ |
+| Кодировка / переводы строк | `grep -c "Справочник" src/references/sdlc/*.md`; `file … \| grep -c CRLF` | UTF-8 читается, **0 CRLF** ✅ |
+
+Помечены корпоративным контуром 6 файлов: `test-docs`, `test-design`
+(целиком — Jira / Confluence / Figma / система управления тестированием),
+`requirements`, `architecture`, `new-feature`, `continue-feature`
+(частично — подтягивание постановки и контекста из внешних систем).
+
+## Что НЕ сделано и почему
+
+- **Удаление `~/.claude/skills/sdlc-*` не выполнено** — по постановке это делает
+  сопровождающий сессию после мержа ветки. Список каталогов — ниже.
+- **Ветка не пушится, worktree не удаляется** — по постановке.
+- Не трогались: корневой `README.md`, `src/process/` (WI-2), `docs/regulations/`
+  (WI-1), `scripts/` (WI-2). Ссылки на коды регламентов даны по кодам
+  (`docs/regulations/README.md`, R…), без привязки к именам файлов WI-1.
+- Не переносились три пустые заготовки регламентов и корпоративные ссылки на
+  внутренние страницы Confluence сверх тех, что уже были в перенесённых файлах.
+
+## К удалению после мержа (ровно перенесённые каталоги)
+
+```
+~/.claude/skills/sdlc-architecture
+~/.claude/skills/sdlc-build
+~/.claude/skills/sdlc-code-review
+~/.claude/skills/sdlc-continue-feature
+~/.claude/skills/sdlc-development
+~/.claude/skills/sdlc-development-backend
+~/.claude/skills/sdlc-development-frontend
+~/.claude/skills/sdlc-full
+~/.claude/skills/sdlc-new-feature
+~/.claude/skills/sdlc-operations
+~/.claude/skills/sdlc-requirements
+~/.claude/skills/sdlc-system-analysis
+~/.claude/skills/sdlc-test-design
+~/.claude/skills/sdlc-test-docs
+~/.claude/skills/sdlc-testing
+```
+
+После удаления: `ls ~/.claude/skills/ | grep -c sdlc` должно дать `0`.
