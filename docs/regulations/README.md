@@ -67,7 +67,7 @@
 | Код | Название | Ур. | Д0/E | Статус | Файл |
 |---|---|---|---|---|---|
 | R4.1 | Пирамида тестов и обязательные ярусы на PR | A | Д0 | `active` | [R4.1-testing-pyramid.md](R4.1-testing-pyramid.md) |
-| R4.2 | Гейт CI | A | Д0 | `stub` | [R4.2-ci-gate.md](R4.2-ci-gate.md) |
+| R4.2 | Гейт CI | A | Д0 | `draft` | [R4.2-ci-gate.md](R4.2-ci-gate.md) |
 | R4.3 | Сторожа и мутации | A | Д0 | `active` | [R4.3-guards-and-mutations.md](R4.3-guards-and-mutations.md) |
 | R4.4 | Код-ревью | A | Д0 | `stub` | [R4.4-code-review.md](R4.4-code-review.md) |
 | R4.5 | Definition of Done | A | Д0 | `stub` | [R4.5-definition-of-done.md](R4.5-definition-of-done.md) |
