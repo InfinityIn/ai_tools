@@ -1,0 +1,3 @@
+# Preserve executable script formats in the vendored design bundle.
+src/skills/impeccable/scripts/impeccable.cmd text eol=crlf
+src/skills/impeccable/scripts/impeccable text eol=lf

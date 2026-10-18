@@ -10,9 +10,12 @@
 #                                          or is missing. Directories in Dest
 #                                          that do not come from src are listed
 #                                          as "foreign" and are not a failure.
+#   Add -Only name1,name2 to install/check an exact subset.
 param(
     [string]$Dest = (Join-Path $env:USERPROFILE ".claude\skills"),
-    [switch]$Check
+    [switch]$Check,
+    # Optional exact skill names. Omit to keep the existing install-all behavior.
+    [string[]]$Only
 )
 
 $ErrorActionPreference = "Stop"
@@ -22,6 +25,16 @@ $root = Split-Path -Parent $PSScriptRoot
 $skills = @(Get-ChildItem -Directory -Path (Join-Path $root "src\*\*") |
     Where-Object { Test-Path (Join-Path $_.FullName "SKILL.md") } |
     Sort-Object Name)
+
+$allSkillNames = @($skills.Name)
+if ($Only) {
+    $unknown = @($Only | Where-Object { $_ -notin $skills.Name })
+    if ($unknown.Count) { throw "Unknown skill(s): $($unknown -join ', ')" }
+    $skills = @($skills | Where-Object { $_.Name -in $Only })
+}
+
+$duplicates = @($skills | Group-Object Name | Where-Object Count -gt 1)
+if ($duplicates.Count) { throw "Duplicate skill names: $($duplicates.Name -join ', ')" }
 
 if ($skills.Count -eq 0) {
     Write-Host "no skills found under $root\src (expected src\<group>\<skill>\SKILL.md)"
@@ -43,9 +56,18 @@ function Get-RelativeFileMap {
 
 if (-not $Check) {
     New-Item -ItemType Directory -Force $Dest | Out-Null
+    $resolvedDest = (Resolve-Path -LiteralPath $Dest).Path.TrimEnd('\', '/')
     foreach ($skill in $skills) {
-        $target = Join-Path $Dest $skill.Name
-        if (Test-Path $target) { Remove-Item -Recurse -Force $target }
+        $target = [System.IO.Path]::GetFullPath((Join-Path $resolvedDest $skill.Name))
+        if (-not $target.StartsWith($resolvedDest + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)) {
+            throw "Skill destination escapes install directory: $target"
+        }
+        if (Test-Path -LiteralPath $target) {
+            if ((Get-Item -LiteralPath $target).Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
+                throw "Refusing to overwrite linked skill directory: $target"
+            }
+            Remove-Item -LiteralPath $target -Recurse -Force
+        }
         Copy-Item -Recurse $skill.FullName $target
         Write-Host "installed: $($skill.Name) -> $target"
     }
@@ -89,8 +111,7 @@ foreach ($skill in $skills) {
 }
 
 # Extra directories in Dest are reported, but are not a failure.
-$names = $skills | ForEach-Object { $_.Name }
-Get-ChildItem -Directory -Path $Dest | Where-Object { $names -notcontains $_.Name } |
+Get-ChildItem -Directory -Path $Dest | Where-Object { $allSkillNames -notcontains $_.Name } |
     ForEach-Object { Write-Host "foreign:  $($_.Name) (not from ai_tools)" }
 
 if ($problems -gt 0) {
